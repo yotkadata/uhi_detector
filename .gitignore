@@ -1,3 +1,9 @@
+data/landcover_ai/
+data/landsat/
+data/orthophotos/
+data/sentinel/
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
