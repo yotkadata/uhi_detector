@@ -13,6 +13,7 @@ from matplotlib import colors
 from pylandtemp import single_window
 from shapely.geometry import shape
 from rasterio.warp import Resampling, calculate_default_transform, reproject
+from rasterio.windows import get_data_window, transform, shape
 
 
 def clip_to_geojson(band_path, geojson_path, target_dir=None):
@@ -472,3 +473,32 @@ def create_rgba_color_image(src_path: Path, target_path: Path):
             dst.write(colored_img_rio)
 
         return dst, colored_img
+
+
+def clip_to_remove_nodata(input_path: Path, output_path: Path = None) -> None:
+    """
+    Clip a raster to the data window to remove nodata values.
+    TODO: Doesn't clip. https://gis.stackexchange.com/a/428982
+    """
+    if output_path is None:
+        output_path = Path(
+            input_path.parent, input_path.stem + "_clipped" + input_path.suffix
+        )
+
+    with rasterio.open(input_path) as src:
+        profile = src.profile.copy()
+        data_window = get_data_window(src.read(masked=True))
+        data_transform = transform(data_window, src.transform)
+        profile.update(
+            transform=data_transform,
+            height=data_window.height,
+            width=data_window.width,
+        )
+
+        data = src.read(window=data_window)
+
+    with rasterio.open(output_path, "w", **profile) as dst:
+        dst.write(data)
+
+    if output_path.is_file():
+        print(f"Clipped file saved to {output_path}")
