@@ -10,10 +10,10 @@ import numpy as np
 import rasterio
 import rasterio.mask
 from matplotlib import colors
-from pylandtemp import single_window
-from shapely.geometry import shape
+from pylandtemp import single_window, ndvi
 from rasterio.warp import Resampling, calculate_default_transform, reproject
-from rasterio.windows import get_data_window, transform, shape
+from rasterio.windows import get_data_window, shape, transform
+from shapely.geometry import shape
 
 
 def clip_to_geojson(band_path, geojson_path, target_dir=None):
@@ -344,6 +344,38 @@ def calc_lst(
     print("Saved Land Surface Temperature (LST) to", target_path)
 
     return lst_image_array
+
+
+def calc_ndvi(band_4_path: Path, band_5_path: Path, target_path: Path) -> np.ndarray:
+    """
+    Calculate Normalized Difference Vegetation Index (NDVI) from Landsat 8
+    bands 4 and 5 using pylandtemp library.
+    """
+    with rasterio.open(band_4_path) as src:
+        band_4 = src.read(1)
+
+    with rasterio.open(band_5_path) as src:
+        band_5 = src.read(1)
+        out_meta = src.meta.copy()
+
+    mask = band_4 == 0
+    ndvi_image_array = ndvi(band_5, band_4, mask=mask)
+
+    out_meta.update(
+        {
+            "height": ndvi_image_array.shape[0],
+            "width": ndvi_image_array.shape[1],
+            "transform": src.transform,
+            "dtype": ndvi_image_array.dtype,
+        }
+    )
+
+    with rasterio.open(target_path, "w", **out_meta) as dst:
+        dst.write(ndvi_image_array, 1)
+
+    print("Saved NDVI to", target_path)
+
+    return ndvi_image_array
 
 
 def exaggerate(input_array: np.ndarray, factor: float = 2) -> np.ndarray:
