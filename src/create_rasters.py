@@ -104,6 +104,9 @@ def create_raster_lst(file_paths):
 
 
 def main():
+    """
+    Main function.
+    """
     # Directory paths
     dir_paths = {
         "root": Path().cwd(),
