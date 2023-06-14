@@ -8,7 +8,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 import pandas as pd
+import rasterio
 from patchify import patchify
+from rasterio.windows import Window
 
 
 def create_patches(
@@ -56,6 +58,77 @@ def create_patches(
 
                     if not patch_path.is_file():
                         cv2.imwrite(str(patch_path), single_patch_img)
+                        counter_create += 1
+                    else:
+                        counter_skip += 1
+
+            print(f"Created {counter_create} patches in {patch_dir}.")
+            print(f"Skipped {counter_skip} already existing patches.")
+
+
+def create_geo_patches(
+    input_dir: Path,
+    patch_dir: Path,
+    filetypes: list = None,
+    patch_size: int = 256,
+):
+    """
+    Function to create patches from large images, maintaining geodata.
+    """
+
+    # Set default file types
+    if filetypes is None:
+        filetypes = [".tif", ".tiff"]
+
+    # Check if output folder exists, if not, create it
+    patch_dir.mkdir(parents=True, exist_ok=True)
+
+    # Iterate over all files in the input folder
+    for filepath in input_dir.glob("*.tif"):
+        # Skip if not a file or not correct file type
+        if not filepath.is_file() or not filepath.suffix in filetypes:
+            continue
+
+        # Open the GeoTIFF file
+        with rasterio.open(filepath) as src:
+            # Get the metadata of the original GeoTIFF file
+            meta = src.meta
+
+            # Calculate the number of patches in row and column directions
+            n_patches_x = src.width // patch_size
+            n_patches_y = src.height // patch_size
+
+            counter_create, counter_skip = 0, 0
+
+            # Iterate over all patches
+            for i in range(n_patches_y):
+                for j in range(n_patches_x):
+                    # Define the output filename
+                    output_filename = patch_dir / f"{filepath.stem}_patch_{i}_{j}.tif"
+
+                    if not output_filename.is_file():
+                        # Define the window of the patch
+                        window = Window(
+                            j * patch_size, i * patch_size, patch_size, patch_size
+                        )
+
+                        # Read the patch
+                        patch = src.read(window=window)
+
+                        # Update the metadata for the patch
+                        meta.update(
+                            {
+                                "height": patch_size,
+                                "width": patch_size,
+                                "transform": rasterio.windows.transform(
+                                    window, src.transform
+                                ),
+                            }
+                        )
+
+                        # Write the patch to a new GeoTIFF file
+                        with rasterio.open(output_filename, "w", **meta) as dst:
+                            dst.write(patch)
                         counter_create += 1
                     else:
                         counter_skip += 1
