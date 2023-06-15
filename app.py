@@ -1,44 +1,58 @@
-from pathlib import Path
-
-import folium
-import numpy as np
-import rasterio
 import streamlit as st
-from streamlit_folium import st_folium
+import os
+import sys
 
-dir_data_root = Path("data/landsat/")
-dir_output = Path(dir_data_root, "output")
-geojson_path = Path(dir_data_root, "geojson", "berlin.geojson")
-file_temperature_repr_colored = Path(dir_output, "temperature_reprojected_colored.tif")
+# Add app to path
+module_path = os.path.abspath(os.path.join("app"))
+if module_path not in sys.path:
+    sys.path.append(module_path)
 
-st.set_page_config(layout="wide")
-st.title("Urban Heat Island Detector")
-
-with rasterio.open(file_temperature_repr_colored) as colored_img:
-    # Load GeoTIFF as ndarray
-    colored_img_array = colored_img.read()
-
-    # Move channel axis to third position
-    colored_img_array = np.moveaxis(colored_img_array, source=0, destination=2)
-
-m = folium.Map(
-    location=[
-        (colored_img.bounds.bottom + colored_img.bounds.top) / 2,
-        (colored_img.bounds.left + colored_img.bounds.right) / 2,
-    ],
-    tiles="Stamen Terrain",
-    zoom_start=12,
+st.set_page_config(
+    page_title="Urban Heat Island Detector",
+    # page_icon="👋",
+    layout="wide",
 )
-folium.raster_layers.ImageOverlay(
-    image=colored_img_array,
-    name="Land Surface Temperature",
-    opacity=0.75,
-    bounds=[
-        [colored_img.bounds.bottom, colored_img.bounds.left],
-        [colored_img.bounds.top, colored_img.bounds.right],
-    ],
-).add_to(m)
 
-folium.LayerControl().add_to(m)
+with st.sidebar:
+    st.write("### Page selection")
+    page_selected = st.radio(
+        "Select a page to show",
+        (
+            "Start",
+            "Segmentation from file",
+            "Segmentation examples",
+            "Maps",
+            "Life segementation",
+        ),
+    )
 
-st_data = st_folium(m, width=1200, height=1200 / 16 * 9)
+if page_selected == "Start":
+    st.write("# Urban Heat Island Detector")
+    st.markdown(
+        """
+        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
+        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
+        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
+        Some welcome text. Some welcome text. Some welcome text. 
+        """
+    )
+
+elif page_selected == "Maps":
+    # Show app/landsat-maps.py
+    import landsat_maps
+
+    landsat_maps.main()
+
+elif page_selected == "Life segementation":
+    # Show app/landsat-maps.py
+    st.title("Life segementation")
+
+elif page_selected == "Segmentation from file":
+    import predict_file
+
+    predict_file.main()
+
+elif page_selected == "Segmentation examples":
+    import examples
+
+    examples.main()
