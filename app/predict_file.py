@@ -16,6 +16,8 @@ module_path = os.path.abspath(os.path.join("src"))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
+import utils
+
 
 def main():
     """
@@ -73,30 +75,8 @@ def main():
                         img_array, model_path, 5, "resnet34", patch_size=256
                     )
 
-                # Map the values from 0-4 to RGBA colors (you can choose any colors)
-                # Here, 0 is mapped to transparent
-                colors = {
-                    0: (0, 0, 0, 0),  # Transparent
-                    1: (239, 131, 84, 200),  # Buildings
-                    2: (22, 219, 147, 200),  # Trees
-                    3: (38, 103, 255, 200),  # Water
-                    4: (224, 202, 60, 200),  # Roads
-                }
-
-                # Prepare an empty array for the colored image (height x width x 4 for RGBA)
-                colored_image = np.zeros((*prediction.shape, 4), dtype=np.uint8)
-
-                # Apply colors
-                for val, color in colors.items():
-                    colored_image[prediction == val] = color
-
-                # Convert numpy array to PIL image
-                segmented_img = Image.fromarray(colored_image)
-
-                segmented_png = f"data/predict/app/prediction/{uploaded_file.name}.png"
-                segmented_img.save(segmented_png)
-
-                overlay = Image.alpha_composite(img.convert("RGBA"), segmented_img)
+                # Prepare images for display in a split view.
+                img, segmented_img, overlay = utils.prepare_split_image(img, prediction)
 
                 # Show image comparison in placeholder container
                 with placeholder.container():
@@ -104,6 +84,10 @@ def main():
                         img1=img,
                         img2=overlay,
                     )
+
+                # Save the segmented image to a png file directory
+                segmented_png = f"data/predict/app/prediction/{uploaded_file.name}.png"
+                segmented_img.save(segmented_png)
 
                 # Define file path
                 output_file_path = Path(

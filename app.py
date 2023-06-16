@@ -22,7 +22,7 @@ with st.sidebar:
             "Segmentation from file",
             "Segmentation examples",
             "Maps",
-            "Life segementation",
+            "Live segementation",
         ),
     )
 
@@ -43,9 +43,10 @@ elif page_selected == "Maps":
 
     landsat_maps.main()
 
-elif page_selected == "Life segementation":
-    # Show app/landsat-maps.py
-    st.title("Life segementation")
+elif page_selected == "Live segementation":
+    import predict_interactive
+
+    predict_interactive.main()
 
 elif page_selected == "Segmentation from file":
     import predict_file
