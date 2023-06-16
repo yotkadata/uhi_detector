@@ -14,6 +14,7 @@ from pylandtemp import emissivity, ndvi, single_window
 from rasterio.warp import Resampling, calculate_default_transform, reproject
 from rasterio.windows import get_data_window, shape, transform
 from shapely.geometry import shape
+from PIL import Image
 
 
 def clip_to_geojson(band_path, geojson_path, target_dir=None):
@@ -28,16 +29,16 @@ def clip_to_geojson(band_path, geojson_path, target_dir=None):
     # Load a GeoJSON or shapefile of the area of interest
     aoi = gpd.read_file(geojson_path)
 
-    # Set correct CRS (obtained from:
-    # check = rasterio.open(band_path)
-    # check.crs
-    aoi = aoi.to_crs("EPSG:32633")  # TODO Take directly from src.crs
-
-    # Transform to a Shapely geometry
-    aoi_shape = [shape(aoi.geometry.loc[0])]
-
     # Open the Landsat band file
     with rasterio.open(band_path) as src:
+        # Set correct CRS (obtained from:
+        # check = rasterio.open(band_path)
+        # check.crs
+        aoi = aoi.to_crs(src.crs)  # "EPSG:32633")  # TODO Take directly from src.crs
+
+        # Transform to a Shapely geometry
+        aoi_shape = [shape(aoi.geometry.loc[0])]
+
         # Clip the raster file with the polygon using mask function
         out_image, out_transform = rasterio.mask.mask(src, aoi_shape, crop=True)
         out_meta = src.meta
@@ -572,3 +573,36 @@ def clip_to_remove_nodata(input_path: Path, output_path: Path = None) -> None:
 
     if output_path.is_file():
         print(f"Clipped file saved to {output_path}")
+
+
+def prepare_split_image(
+    img: np.ndarray, prediction: np.ndarray
+) -> tuple[Image.Image, Image.Image, Image.Image]:
+    """
+    Prepare images for display in a split view.
+    """
+
+    # Map the values from 0-4 to RGBA colors (you can choose any colors)
+    colors = {
+        0: (0, 0, 0, 0),  # Unclassified (transparent)
+        1: (239, 131, 84, 200),  # Buildings
+        2: (22, 219, 147, 200),  # Trees
+        3: (38, 103, 255, 200),  # Water
+        4: (224, 202, 60, 200),  # Roads
+    }
+
+    # Prepare an empty array for the colored image (height x width x 4 for RGBA)
+    colored_image = np.zeros((*prediction.shape, 4), dtype=np.uint8)
+
+    # Apply colors
+    for val, color in colors.items():
+        colored_image[prediction == val] = color
+
+    # Convert numpy array to PIL image
+    original_img = Image.fromarray(img).convert("RGBA")
+    segmented_img = Image.fromarray(colored_image)
+
+    # Create an overlay image
+    overlay = Image.alpha_composite(original_img, segmented_img)
+
+    return original_img, segmented_img, overlay

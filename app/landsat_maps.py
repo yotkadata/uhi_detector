@@ -56,9 +56,16 @@ def create_map(raster_path, names):
     ]
 
     m = folium.Map(
-        location=bounds,
+        # location=bounds,
         tiles="Stamen Terrain",
-        zoom_start=12,
+        # zoom_start=12,
+    )
+
+    m.fit_bounds(
+        [
+            [map_layer_bounds.bottom, map_layer_bounds.left],  # south-west
+            [map_layer_bounds.top, map_layer_bounds.right],  # north-east
+        ]
     )
 
     create_overlay(raster_path, m, names[raster_path.stem])
@@ -72,7 +79,15 @@ def main():
     """
     Main function.
     """
-    id = "LC09_L1TP_193023_20220624_20230409_02_T1"
+    # Berlin
+    # id = "LC09_L1TP_193023_20220624_20230409_02_T1"
+    # Wolfsburg
+    # id = "LC08_L1TP_194024_20230610_20230614_02_T1"
+    # Caracas
+    # id = "LC09_L1TP_004053_20221205_20230318_02_T1"
+    # Istanbul
+    id = "LC09_L1TP_179032_20230217_20230310_02_T1"
+
     dir_data_root = Path("data")
     dir_raster = dir_data_root / "raster_files"
     geojson_path = Path("data/geojson/berlin.geojson")
