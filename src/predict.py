@@ -8,6 +8,7 @@ import sys
 import segmentation_models as sm
 from sklearn.preprocessing import MinMaxScaler
 from keras.models import load_model
+import streamlit as st
 
 module_path = os.path.abspath(os.path.join("../src"))
 if module_path not in sys.path:
@@ -16,13 +17,12 @@ if module_path not in sys.path:
 from smooth_tiled_predictions import predict_img_with_smooth_windowing
 
 
-def get_smooth_prediction_for_file(
-    img, model_path, n_classes, backbone, patch_size=256
-):
+@st.cache_data
+def get_smooth_prediction_for_file(img, _model, n_classes, backbone, patch_size=256):
     """
     Predict on a single file.
     """
-    model = load_model(model_path, compile=False)
+    # model = load_model(model_path, compile=False)
     scaler = MinMaxScaler()
     preprocess_input = sm.get_preprocessing(backbone)
 
@@ -45,7 +45,7 @@ def get_smooth_prediction_for_file(
         window_size=patch_size,
         subdivisions=2,  # Minimal amount of overlap for windowing. Must be an even number.
         nb_classes=n_classes,
-        pred_func=(lambda img_batch_subdiv: model.predict((img_batch_subdiv))),
+        pred_func=(lambda img_batch_subdiv: _model.predict((img_batch_subdiv))),
     )
 
     final_prediction = np.argmax(predictions_smooth, axis=2)
