@@ -168,6 +168,7 @@ def create_rgb_composite(
 
     with rasterio.open(band_red_path, driver=driver) as src:
         band_red = src.read(1)
+        meta = src.meta
 
     # Apply gamma correction (default: gamma=1 means no change)
     red_g = gamma_corr(band_red, gamma=gamma)
@@ -190,18 +191,20 @@ def create_rgb_composite(
     # Create output directory if it does not exist
     target_path.parent.mkdir(parents=True, exist_ok=True)
 
+    meta.update(
+        {
+            "count": 3,
+            "dtype": "uint8",
+            "nodata": 0,
+        }
+    )
+
     # Save the RGB composite to a new GeoTiff file
     with rasterio.open(
         target_path,
         "w",
-        driver=src.driver,
         height=band_red.shape[0],
         width=band_red.shape[1],
-        count=3,
-        dtype="uint8",
-        crs=src.crs,
-        transform=src.transform,
-        nodata=0,
     ) as dst:
         # Move channel information to first axis
         out_array = np.moveaxis(rgb_composite_gbn, source=2, destination=0)
