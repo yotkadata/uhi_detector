@@ -1,27 +1,25 @@
 """
 Streamlit app page to display Landsat maps.
 """
+import json
 from pathlib import Path
 
 import folium
 import numpy as np
-import rasterio
 import streamlit as st
-from streamlit_folium import st_folium, folium_static
+from PIL import Image
+from streamlit_folium import st_folium
 
 
 @st.cache_data
 def load_raster(file_path):
     """
-    Load GeoTIFF as ndarray.
+    Load Raster file as ndarray.
     """
-    with rasterio.open(file_path) as map_layer:
-        # Load GeoTIFF as ndarray
-        map_layer_array = map_layer.read()
-        map_layer_bounds = map_layer.bounds
+    map_layer_array = np.array(Image.open(file_path))
 
-        # Move channel axis to third position
-        map_layer_array = np.moveaxis(map_layer_array, source=0, destination=2)
+    with open(file_path.parent / f"{file_path.stem}_bounds.json", "r") as f:
+        map_layer_bounds = json.load(f)
 
     return map_layer_array, map_layer_bounds
 
@@ -37,10 +35,7 @@ def create_overlay(file_path, map, name):
         image=map_layer_array,
         name=name,
         opacity=0.75,
-        bounds=[
-            [map_layer_bounds.bottom, map_layer_bounds.left],
-            [map_layer_bounds.top, map_layer_bounds.right],
-        ],
+        bounds=map_layer_bounds,
     ).add_to(map)
 
 
@@ -50,25 +45,15 @@ def create_map(raster_path, names):
     """
     _, map_layer_bounds = load_raster(raster_path)
 
-    bounds = [
-        (map_layer_bounds.bottom + map_layer_bounds.top) / 2,
-        (map_layer_bounds.left + map_layer_bounds.right) / 2,
-    ]
-
     m = folium.Map(
         # location=bounds,
         tiles="Stamen Terrain",
         # zoom_start=12,
     )
 
-    m.fit_bounds(
-        [
-            [map_layer_bounds.bottom, map_layer_bounds.left],  # south-west
-            [map_layer_bounds.top, map_layer_bounds.right],  # north-east
-        ]
-    )
-
     create_overlay(raster_path, m, names[raster_path.stem])
+
+    m.fit_bounds(map_layer_bounds)
 
     folium.LayerControl().add_to(m)
 
@@ -91,9 +76,9 @@ def main():
     dir_data_root = Path("data")
     dir_raster = dir_data_root / "raster_files"
     geojson_path = Path("data/geojson/berlin.geojson")
-    file_lst = Path(dir_raster, id + "_lst_repr_colored.tif")
-    file_ndvi = Path(dir_raster, id + "_ndvi_repr_colored.tif")
-    file_emissivity = Path(dir_raster, id + "_emissivity_repr_colored.tif")
+    file_lst = Path(dir_raster, id + "_lst_repr_colored.png")
+    file_ndvi = Path(dir_raster, id + "_ndvi_repr_colored.png")
+    file_emissivity = Path(dir_raster, id + "_emissivity_repr_colored.png")
 
     names = {
         file_lst.stem: "Land Surface Temperature",

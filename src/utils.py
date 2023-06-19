@@ -2,19 +2,20 @@
 Collection of utility functions.
 """
 
+import json
 from pathlib import Path
 
-import branca.colormap as cm
 import geopandas as gpd
+import matplotlib.pyplot as plt
 import numpy as np
 import rasterio
 import rasterio.mask
 from matplotlib import colors
+from PIL import Image
 from pylandtemp import emissivity, ndvi, single_window
 from rasterio.warp import Resampling, calculate_default_transform, reproject
 from rasterio.windows import get_data_window, shape, transform
 from shapely.geometry import shape
-from PIL import Image
 
 
 def clip_to_geojson(band_path, geojson_path, target_dir=None):
@@ -443,28 +444,6 @@ def exaggerate(input_array: np.ndarray, factor: float = 2) -> np.ndarray:
     return exaggerated_temperature
 
 
-def convert_values_to_colors(values: np.ndarray, cmap) -> np.ndarray:
-    """
-    Convert image values to colors using a colormap.
-
-    Inputs:
-        - values: 2D NumPy array of image values
-        - cmap: a branca.colormap.LinearColormap object
-    Output:
-        - 3D NumPy array representing colored image
-    """
-    colors_arr = np.zeros((*values.shape, 4))
-    for i in range(values.shape[0]):
-        for j in range(values.shape[1]):
-            value = values[i, j]
-            if np.isnan(value):
-                colors_arr[i, j, :] = [0, 0, 0, 0]  # Transparent color for NaN values
-            else:
-                color = colors.to_rgba(cmap(value), alpha=0.7)
-                colors_arr[i, j, :] = color
-    return colors_arr
-
-
 def reproject_geotiff(src_path, target_path, target_crs):
     """
     Function to reproject a GeoTiff to a different CRS.
@@ -521,32 +500,68 @@ def reproject_geotiff(src_path, target_path, target_crs):
 def create_rgba_color_image(src_path: Path, target_path: Path):
     """
     Function to map raster values to rgba.
+
+    Parameters
+    ----------
+    src_path : Path
+        Path to the source raster file. Assumes that the raster has a single band.
+    target_path : Path
+        Path to the target raster file. Raster will have 4 bands.
     """
-    with rasterio.open(src_path) as src:
-        img = src.read()  # .astype(np.float32)
 
-        # Set the nodata values to NaN
-        # img[img == src.nodata] = np.nan
+    with rasterio.open(str(src_path)) as src:
+        band = src.read(1)
+        bounds = src.bounds
+        meta = src.meta.copy()
 
-        vmin = np.floor(np.nanmin(img))
-        vmax = np.ceil(np.nanmax(img))
+    # Normalize band values to range [0, 1]
+    band_norm = (band - np.nanmin(band)) / (np.nanmax(band) - np.nanmin(band))
 
-        colormap = cm.linear.RdBu_11.scale(vmin, vmax)
-        colormap.colors.reverse()
+    # Get minimum and maximum, ignoring NaNs
+    vmin = np.nanmin(band_norm)
+    vmax = np.nanmax(band_norm)
 
-        colored_img = convert_values_to_colors(img[0], colormap)
+    # For values less than vmin, assign 0
+    band_norm[band_norm < vmin] = 0
 
-        # Update src.meta
-        colored_meta = src.meta.copy()
-        colored_meta.update({"count": 4})
+    # Linear stretch normalization to range [0, 1]
+    band_norm = (band_norm - vmin) / (vmax - vmin)
 
-        # Write the reprojected image to a new GeoTIFF file
-        with rasterio.open(target_path, "w", **colored_meta) as dst:
-            # Move channel information to first axis
-            colored_img_rio = np.moveaxis(colored_img, source=2, destination=0)
-            dst.write(colored_img_rio)
+    # Create a colormap
+    cmap = plt.get_cmap("RdBu_r")
+    norm = colors.Normalize(vmin=0, vmax=1)
 
-        return dst, colored_img
+    # Apply the colormap to the normalized band values
+    image = cmap(norm(band_norm))
+
+    # Convert the float values in [0,1] to uint8 values in [0,255]
+    image = (image * 255).astype(np.uint8)
+
+    # Create paths for the PNG and JSON files
+    png_image_path = target_path.parent / (target_path.stem + ".png")
+    json_path = target_path.parent / (target_path.stem + "_bounds.json")
+
+    # Save the image as a PNG
+    plt.imsave(png_image_path, image)
+
+    # Save the bounds in a JSON file
+    bbox = [
+        [bounds.bottom, bounds.left],
+        [bounds.top, bounds.right],
+    ]
+    with open(json_path, "w", encoding="utf-8") as file:
+        json.dump(bbox, file)
+
+    # Update metadata
+    meta.update(count=4, dtype=rasterio.uint8)
+
+    # Write the reprojected image to a new GeoTIFF file
+    with rasterio.open(target_path, "w", **meta) as dst:
+        # Move channel information to first axis
+        img_rio = np.moveaxis(image, source=2, destination=0)
+        dst.write(img_rio.astype(rasterio.uint8))
+
+    return dst, image
 
 
 def clip_to_remove_nodata(input_path: Path, output_path: Path = None) -> None:
