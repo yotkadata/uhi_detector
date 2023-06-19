@@ -216,13 +216,15 @@ def select_useful_patches(
     # Load inventory
     inventory = pd.read_csv(inventory_path, index_col=0)
 
-    # Get image names with most buildings
+    # # Get image names with most buildings
     # accepted_images = (
-    #     inventory.sort_values("1_pct", ascending=False)
+    #     inventory[inventory["1_pct"] >= 0.01]
+    #     .sort_values("1_pct", ascending=False)
     #     .reset_index()
-    #     .loc[:999, "img"]
+    #     .loc[:1999, "img"]
     #     .tolist()
     # )
+    # print(f"Added {len(accepted_images)} images with focus on buildings.")
 
     # Get image names with most useful information
     # accepted_images = (
@@ -235,12 +237,12 @@ def select_useful_patches(
     # Make sure all classes are represented
     accepted_images = []
     for class_name in classes.keys():
-        if not class_name == 0:
+        if not class_name in [0, 2]:
             selection = (
                 inventory[~inventory["img"].isin(accepted_images)]
                 .sort_values(f"{class_name}_pct", ascending=False)
                 .reset_index()
-                .loc[:499, "img"]
+                .loc[:999, "img"]
                 .tolist()
             )
             accepted_images += selection
