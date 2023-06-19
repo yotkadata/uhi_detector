@@ -57,17 +57,6 @@ def main():
                 img2=overlay,
             )
 
-        # st.write(images)
-        # st.write(segmentations)
-        # grid = make_grid(3, 2)
-
-        # grid[0][0].image(str(images[0]), use_column_width="always")
-        # grid[0][1].image(str(images[1]), use_column_width="always")
-        # grid[1][0].image(str(images[2]), use_column_width="always")
-        # grid[1][1].image(str(images[3]), use_column_width="always")
-        # grid[2][0].image(str(images[4]), use_column_width="always")
-        # grid[2][1].image(str(images[5]), use_column_width="always")
-
 
 if __name__ == "__main__":
     main()
