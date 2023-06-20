@@ -13,9 +13,15 @@ module_path = os.path.abspath(os.path.join("app"))
 if module_path not in sys.path:
     sys.path.append(module_path)
 
+import landsat_maps
+import segmentation
+
 
 @st.cache_data
 def display_tools():
+    """
+    Display tools used in the project.
+    """
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -43,10 +49,24 @@ def display_tools():
 
 @st.cache_data
 def display_mean_temperatures():
-    st.image(
-        "data/presentation/berlin-germany-mean-temperature-2022_ref-1942-2022.png",
-        use_column_width=True,
-    )
+    """
+    Display mean temperatures image.
+    """
+    _, col2, _ = st.columns([1, 3, 1])
+
+    with col2:
+        st.image(
+            "data/presentation/berlin-germany-mean-temperature-2022_ref-1942-2022.png",
+            use_column_width=True,
+        )
+
+
+@st.cache_data
+def display_image(img_path):
+    """
+    Display image from path.
+    """
+    st.image(img_path, use_column_width=True)
 
 
 st.set_page_config(
@@ -54,52 +74,43 @@ st.set_page_config(
     layout="wide",
 )
 
+with open("app/style.css", encoding="utf-8") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+
 with st.sidebar:
     st.write("### Page selection")
     page_selected = st.radio(
         "Select a page to show",
         (
-            "Segmentation from file",
-            "Live segementation",
             "Start",
-            "Segmentation examples",
-            "Maps",
             "Mean Temperatures",
+            "Segmentation",
+            "Maps",
             "Tools",
         ),
     )
 
 if page_selected == "Start":
-    st.write("# Urban Heat Island Detector")
+    display_image("data/presentation/heat_island_wolfsburg_slice.png")
+
     st.markdown(
         """
-        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
-        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
-        Some welcome text. Some welcome text. Some welcome text. Some welcome text. 
-        Some welcome text. Some welcome text. Some welcome text. 
-        """
+        <h1 style="text-align: center;">Urban Heat Island Detector</h1>
+        <p style="text-align: center;">
+            <strong>Final project for the Data Science Bootcamp</strong>
+        </p>
+        <p style="text-align: center;">By Jan Kühn, June 2023</p>
+
+        <p style="text-align: center;"><em>Bergamot Encoders at SPICED Academy, Berlin</em></p>
+        """,
+        unsafe_allow_html=True,
     )
 
 elif page_selected == "Maps":
-    # Show app/landsat-maps.py
-    import landsat_maps
-
     landsat_maps.main()
 
-elif page_selected == "Live segementation":
-    import predict_interactive
-
-    predict_interactive.main()
-
-elif page_selected == "Segmentation from file":
-    import predict_file
-
-    predict_file.main()
-
-elif page_selected == "Segmentation examples":
-    import examples
-
-    examples.main()
+elif page_selected == "Segmentation":
+    segmentation.main()
 
 elif page_selected == "Mean Temperatures":
     display_mean_temperatures()

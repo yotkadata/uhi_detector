@@ -1,0 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@200&display=swap'); 
+
+html, body, [class*="css"] {
+    font-family: 'Lato', sans-serif; 
+}
