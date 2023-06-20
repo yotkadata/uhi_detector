@@ -30,12 +30,12 @@ from utils import prepare_split_image
 MODELS = {
     "resnet34": {
         "description": "Unet ResNet-34",
-        "file_name": "landcover_25_epochs_resnet34_backbone_batch16_iou_0.76.hdf5",
+        "file_name": "landcover_50_epochs_resnet34_backbone_batch16_freeze_iou_0.78.hdf5",
         "backbone": "resnet34",
     },
     "resnet50": {
         "description": "Unet ResNet-50",
-        "file_name": "landcover_25_epochs_resnet50_backbone_batch16_iou_0.82.hdf5",
+        "file_name": "landcover_25_epochs_resnet50_backbone_batch16_freeze_iou_0.86.hdf5",
         "backbone": "resnet50",
     },
 }
@@ -87,7 +87,7 @@ def save_segmented_file(segmented_img, source_path, selected_model):
 
 
 @st.cache_data
-def show_prediction(image_path, selected_model, _placeholder):
+def show_prediction(image_path, selected_model):
     """
     Get and show the prediction for a given image.
     """
@@ -111,15 +111,10 @@ def show_prediction(image_path, selected_model, _placeholder):
     # Prepare images for visualization
     img, segmented_img, overlay = prepare_split_image(img_array, prediction)
 
-    # Show image comparison in placeholder container
-    with _placeholder.container():
-        image_comparison(
-            img1=img,
-            img2=overlay,
-        )
-
     # Save segmented image
     save_segmented_file(segmented_img, image_path, selected_model)
+
+    return img, segmented_img, overlay
 
 
 def tab_live_segmentation():
@@ -139,8 +134,11 @@ def tab_live_segmentation():
             key="model_select_live",
         )
 
+        # location = [52.4944, 13.4348]  # Berlin
+        location = [52.4175, 10.7440]  # Wolfsburg
+
         # Create Folium map
-        m = create_map([52.49442707602441, 13.434820704132562])
+        m = create_map(location)
 
         # Render map
         output = st_folium(m, width=700, height=500)
@@ -175,7 +173,16 @@ def tab_live_segmentation():
 
                 if st.button("Segment", key="segment_button_live"):
                     with st.spinner("Segmenting image..."):
-                        show_prediction(IMAGE_PATH, selected_model, placeholder)
+                        img, segmented_img, overlay = show_prediction(
+                            Path(IMAGE_PATH), selected_model
+                        )
+
+                        # Show image comparison in placeholder container
+                        with placeholder.container():
+                            image_comparison(
+                                img1=img,
+                                img2=overlay,
+                            )
 
 
 def tab_segmentation_from_file():
@@ -227,10 +234,19 @@ def tab_segmentation_from_file():
             # Show a button to start the segmentation
             if st.button("Segment", key="segment_button_file"):
                 with st.spinner("Segmenting ..."):
-                    show_prediction(input_file_path, selected_model, placeholder)
+                    img, segmented_img, overlay = show_prediction(
+                        input_file_path, selected_model
+                    )
+
+                    # Show image comparison in placeholder container
+                    with placeholder.container():
+                        image_comparison(
+                            img1=img,
+                            img2=overlay,
+                        )
 
 
-@st.cache_data
+# @st.cache_data
 def tab_show_examples():
     """
     Page to show some example images.
@@ -241,13 +257,13 @@ def tab_show_examples():
         st.title("Examples of segmentations")
 
         # Create lists of images and segmentations
-        images = [img for img in Path("data/predict/app/source").iterdir()]
+        images = list(Path("data/predict/app/source").iterdir())
 
         for model_key, model_values in MODELS.items():
             valid_images = []
             segmentations = []
 
-            # Get images that have a source and aprediction file
+            # Get images that have a source and a prediction file
             for image in images:
                 segmentation = (
                     image.parent.parent / "prediction" / f"{image.stem}_{model_key}.png"
@@ -264,7 +280,7 @@ def tab_show_examples():
 
             for i in range(n_images):
                 image = Image.open(valid_images[i]).convert("RGBA")
-                segmentation = Image.open(segmentations[i])
+                segmentation = Image.open(segmentations[i]).convert("RGBA")
                 overlay = Image.alpha_composite(image, segmentation)
 
                 image_comparison(

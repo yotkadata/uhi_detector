@@ -3,3 +3,11 @@
 html, body, [class*="css"] {
     font-family: 'Lato', sans-serif; 
 }
+
+h1 {
+    font-size: 4rem;
+}
+
+ul.presentation-bullets li {
+    font-size: 2rem;
+}
