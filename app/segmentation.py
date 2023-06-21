@@ -257,34 +257,52 @@ def tab_show_examples():
         st.title("Examples of segmentations")
 
         # Create lists of images and segmentations
-        images = list(Path("data/predict/app/source").iterdir())
+        image_paths = list(Path("data/predict/app/source").iterdir())
 
         for model_key, model_values in MODELS.items():
             valid_images = []
             segmentations = []
 
             # Get images that have a source and a prediction file
-            for image in images:
-                segmentation = (
-                    image.parent.parent / "prediction" / f"{image.stem}_{model_key}.png"
+            for image_path in image_paths:
+                segmentation_path = (
+                    image_path.parent.parent
+                    / "prediction"
+                    / f"{image_path.stem}_{model_key}.png"
                 )
-                if segmentation.is_file():
-                    valid_images.append(image)
-                    segmentations.append(segmentation)
 
-            # Show 6 images or less if there are less than 6 images
+                # Skip if there is no segmentation file
+                if not segmentation_path.is_file():
+                    continue
+
+                # Load image
+                image = Image.open(image_path).convert("RGBA")
+
+                # Skip if image is too small
+                if image.size[0] < 700:
+                    continue
+
+                # Load segmentation
+                segmentation = Image.open(segmentation_path).convert("RGBA")
+
+                # Append to lists
+                valid_images.append(image)
+                segmentations.append(segmentation)
+
+            # Show 6 images, or less if there are less than 6 images
             n_images = 6 if len(valid_images) > 6 else len(valid_images)
 
             if n_images > 0:
                 st.subheader(model_values["description"])
 
             for i in range(n_images):
-                image = Image.open(valid_images[i]).convert("RGBA")
-                segmentation = Image.open(segmentations[i]).convert("RGBA")
-                overlay = Image.alpha_composite(image, segmentation)
+                # image = Image.open(valid_images[i]).convert("RGBA")
+                # segmentation = Image.open(segmentations[i]).convert("RGBA")
+                # overlay = Image.alpha_composite(image, segmentation)
+                overlay = Image.alpha_composite(valid_images[i], segmentations[i])
 
                 image_comparison(
-                    img1=image,
+                    img1=valid_images[i],
                     img2=overlay,
                 )
 
