@@ -3,6 +3,7 @@ Segment images directly from a map area.
 """
 import os
 import sys
+import time
 from pathlib import Path
 
 import branca.colormap as cm
@@ -45,7 +46,6 @@ MAPBOX_URL = (
     "https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/{z}/{x}/{y}?access_token="
     + st.secrets["MAPBOX_API_KEY"]
 )
-IMAGE_PATH = f"data/predict/app/source/satellite-from-leafmap-{np.random.randint(10000, 99999)}.tif"
 
 
 @st.cache_resource
@@ -121,11 +121,14 @@ def tab_live_segmentation():
     """
     Streamlit app page to segment images directly from a map area.
     """
-    _, col2, _ = st.columns([1, 3, 1])
+    st.title("Live Segmentation")
+
+    col1, col2 = st.columns([1, 1])
+
+    with col1:
+        placeholder = st.empty()
 
     with col2:
-        st.title("Live Segmentation")
-
         # Create a select box for the model
         selected_model = st.selectbox(
             "Model to use",
@@ -141,9 +144,7 @@ def tab_live_segmentation():
         m = create_map(location)
 
         # Render map
-        output = st_folium(m, width=700, height=500)
-
-        placeholder = st.empty()
+        output = st_folium(m, width=800, height=500)
 
         if output["all_drawings"] is not None:
             # Create image from bounding box
@@ -158,9 +159,11 @@ def tab_live_segmentation():
                     # Convert for further use [xmin, ymin, xmax, ymax]
                     bbox = [bbox[0][0], bbox[0][1], bbox[2][0], bbox[2][1]]
 
+                    image_path = f"data/predict/app/source/satellite-from-leafmap-{str(time.time()).replace('.', '-')}.tif"
+
                     # Save the selection as a GeoTIFF
                     tms_to_geotiff(
-                        output=IMAGE_PATH,
+                        output=image_path,
                         bbox=bbox,
                         zoom=18,
                         source=MAPBOX_URL,
@@ -168,35 +171,42 @@ def tab_live_segmentation():
                     )
 
                 # Check if image was created successfully and display it
-                if Path(IMAGE_PATH).is_file():
-                    placeholder.image(IMAGE_PATH, caption="Extracted image")
+                if Path(image_path).is_file():
+                    placeholder.image(image_path, caption="Extracted image", width=700)
 
                 if st.button("Segment", key="segment_button_live"):
                     with st.spinner("Segmenting image..."):
                         img, segmented_img, overlay = show_prediction(
-                            Path(IMAGE_PATH), selected_model
+                            Path(image_path), selected_model
                         )
 
                         # Show image comparison in placeholder container
                         with placeholder.container():
-                            image_comparison(
-                                img1=img,
-                                img2=overlay,
-                            )
+                            image_comparison(img1=img, img2=overlay, width=700)
 
 
 def tab_segmentation_from_file():
     """
     Page to segment images from a file.
     """
-    _, col2, _ = st.columns([1, 3, 1])
+    col1, col2, col3 = st.columns([1, 3, 1])
+
+    with col1:
+        # Create a select box for the model
+        selected_model = st.selectbox(
+            "Model to use",
+            MODELS.keys(),
+            format_func=lambda x: MODELS[x]["description"],
+            key="model_select_file",
+        )
 
     with col2:
         st.title("Segmentation from file")
 
         with st.spinner("Loading ..."):
             uploaded_file = st.file_uploader(
-                "Upload an image file to segment it:", type="tif"
+                "Upload an image file to segment it:",
+                type=["tif", "tiff", "jpg", "jpeg", "png"],
             )
 
         placeholder = st.empty()
@@ -223,14 +233,6 @@ def tab_segmentation_from_file():
                 img_array, caption="Uploaded Image", use_column_width=True
             )
 
-            # Create a select box for the model
-            selected_model = st.selectbox(
-                "Model to use",
-                MODELS.keys(),
-                format_func=lambda x: MODELS[x]["description"],
-                key="model_select_file",
-            )
-
             # Show a button to start the segmentation
             if st.button("Segment", key="segment_button_file"):
                 with st.spinner("Segmenting ..."):
@@ -244,6 +246,9 @@ def tab_segmentation_from_file():
                             img1=img,
                             img2=overlay,
                         )
+
+    with col3:
+        st.write("")
 
 
 # @st.cache_data
@@ -304,6 +309,7 @@ def tab_show_examples():
                 image_comparison(
                     img1=valid_images[i],
                     img2=overlay,
+                    width=800,
                 )
 
 
@@ -311,8 +317,9 @@ def tab_video():
     """
     Page to show a video as an example.
     """
-    video_file = open("data/presentation/janosch.mp4", "rb")
-    video_bytes = video_file.read()
+    with open("data/presentation/screencast-live-segmentation.mp4", "rb") as video_file:
+        video_bytes = video_file.read()
+
     st.video(video_bytes)
 
 

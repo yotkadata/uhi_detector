@@ -55,11 +55,12 @@ def page_what():
     """
     Display page for "What?" section.
     """
+    st.markdown("<br /><br /><br />", unsafe_allow_html=True)
+    st.title("What?")
+
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.title("What?")
-
         st.markdown(
             """
             <ul class="presentation-bullets">
@@ -112,6 +113,8 @@ def page_why():
                 <li>Adverse health effects: <strong>heat-related 
                     illnesses and mortality</strong></li>
             </ul>
+            <br />
+            <br />
             <br />
             """,
             unsafe_allow_html=True,
@@ -218,13 +221,13 @@ def building_footprints():
             display_image("data/presentation/wolfsburg-luminance-tight.png")
 
         with tab4:
-            display_image("data/presentation/wolfsburg-ndvi-tight.png")
+            display_image("data/presentation/wolfsburg-ndvi-tight_manual.png")
 
         with tab5:
-            display_image("data/presentation/wolfsburg-emissivity-tight.png")
+            display_image("data/presentation/wolfsburg-emissivity-tight_manual.png")
 
         with tab6:
-            display_image("data/presentation/wolfsburg-lst-tight.png")
+            display_image("data/presentation/wolfsburg-lst-tight_manual.png")
 
 
 @st.cache_data
@@ -232,7 +235,9 @@ def display_tools():
     """
     Display tools used in the project.
     """
-    st.title("Thank you!")
+    st.title("Thank you Bergamot Encoders!")
+
+    st.markdown("""### ... and Rakib & Parvin & Carmine & all the others!""")
 
     st.markdown("<br /><br /><br /><br /><br /><br />", unsafe_allow_html=True)
 
@@ -272,7 +277,7 @@ def display_mean_temperatures():
     """
     Display mean temperatures image.
     """
-    _, col2, _ = st.columns([1, 4, 1])
+    _, col2, _ = st.columns([1, 8, 1])
 
     with col2:
         st.image(
@@ -297,12 +302,12 @@ with st.sidebar:
             "Start",
             "What?",
             "Why?",
-            "Hot Days",
+            "Heatwaves",
             "Goal",
             "How?",
             "Segment",
-            "Maps",
             "Footprints",
+            "Maps",
             "Tools",
         ),
     )
@@ -331,7 +336,7 @@ elif page_selected == "Footprints":
 elif page_selected == "Segment":
     segmentation.main()
 
-elif page_selected == "Hot Days":
+elif page_selected == "Heatwaves":
     display_mean_temperatures()
 
 elif page_selected == "Tools":

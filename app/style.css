@@ -4,6 +4,11 @@ html, body, [class*="css"] {
     font-family: 'Lato', sans-serif; 
 }
 
+[data-testid="stSidebar"][aria-expanded="true"]{
+    min-width: 80px;
+    max-width: 130px;
+}
+
 h1 {
     font-size: 4rem;
 }
