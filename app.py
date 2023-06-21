@@ -18,12 +18,15 @@ import landsat_maps
 import segmentation
 
 
-@st.cache_data
-def display_image(img_path, caption=None):
+# @st.cache_data
+def display_image(img_path, caption=None, width=None):
     """
     Display image from path.
     """
-    st.image(img_path, use_column_width=True, caption=caption)
+    if width:
+        st.image(img_path, caption=caption, width=width)
+    else:
+        st.image(img_path, use_column_width=True, caption=caption)
 
 
 @st.cache_data
@@ -82,6 +85,7 @@ def page_what():
             label1="",
             label2="",
             starting_position=99,
+            width=700,
         )
 
 
@@ -91,6 +95,9 @@ def page_why():
     Display page for "Why?" section.
     """
     col1, col2, col3 = st.columns([2, 5, 2])
+
+    with col1:
+        st.write("")
 
     with col2:
         st.title("Why is tackling UHI important?")
@@ -110,7 +117,12 @@ def page_why():
             unsafe_allow_html=True,
         )
 
-        display_image("data/presentation/euromomo-charts-pooled-by-age-group.png")
+        display_image(
+            "data/presentation/euromomo-charts-pooled-by-age-group.png", width=900
+        )
+
+    with col3:
+        st.write("")
 
 
 @st.cache_data
@@ -119,6 +131,9 @@ def page_goal():
     Display page for "Why?" section.
     """
     col1, col2, col3, col4 = st.columns([1, 4, 2, 1])
+
+    with col1:
+        st.write("")
 
     with col2:
         st.title("Goal")
@@ -131,6 +146,8 @@ def page_goal():
                 in urban areas from high-resolution satellite imagery.</li>
                 <li>Calculate <strong>brightness of building</strong> patterns.</li>
                 <li>Incorporate Landsat 8 <strong>Thermal Infrared Sensor (TIRS)</strong> data.</li>
+                <li>Identify spots for <strong>public interventions</strong> (green roofs, 
+                    change of roof material/color, solar panels)</li>
             </ul>
             <br />
             """,
@@ -138,8 +155,11 @@ def page_goal():
         )
 
     with col3:
-        display_image("data/presentation/logo_sentinel_2.png")
-        display_image("data/presentation/logo_landsat_8.png")
+        display_image("data/presentation/logo_sentinel_2.png", width=300)
+        display_image("data/presentation/logo_landsat_8.png", width=300)
+
+    with col4:
+        st.write("")
 
 
 @st.cache_data
@@ -150,8 +170,10 @@ def page_how():
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        display_image("data/presentation/unet-model.png")
-        display_image("data/presentation/unet-architecture-building-extraction.jpg")
+        display_image("data/presentation/unet-model.png", width=600)
+        display_image(
+            "data/presentation/unet-architecture-building-extraction.jpg", width=600
+        )
 
     with col2:
         st.title("How is it done?")
@@ -159,11 +181,11 @@ def page_how():
         st.markdown(
             """
             <ul class="presentation-bullets">
+                <li>Using a <strong>pre-trained Unet segmentation model</strong> 
+                    with transfer learning</li>
                 <li><strong>Training dataset:</strong> Landcover.ai with 40 
                     high resolution labeled images (~40.000 patches of 256x256px)</li>
                 <li>Selected <strong>2.000 patches</strong> with relevant information for training</li>
-                <li>Using a <strong>pre-trained Unet segmentation model</strong> 
-                    with transfer learning</li>
                 <li>Model based on <strong>resnet-34 / resnet-50 backbone</strong> 
                     and <strong>imagenet weights</strong>.</li>
                 <li>Used metric: <strong>Mean IoU</strong> (Intersection over Union). Best
@@ -183,7 +205,7 @@ def building_footprints():
 
     with col2:
         tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(
-            ["Satellite", "Buildings", "Luminance", "LST", "NDVI", "Emissivity"]
+            ["Satellite", "Buildings", "Luminance", "NDVI", "Emissivity", "LST"]
         )
 
         with tab1:
@@ -196,13 +218,13 @@ def building_footprints():
             display_image("data/presentation/wolfsburg-luminance-tight.png")
 
         with tab4:
-            display_image("data/presentation/wolfsburg-lst-tight.png")
-
-        with tab5:
             display_image("data/presentation/wolfsburg-ndvi-tight.png")
 
-        with tab6:
+        with tab5:
             display_image("data/presentation/wolfsburg-emissivity-tight.png")
+
+        with tab6:
+            display_image("data/presentation/wolfsburg-lst-tight.png")
 
 
 @st.cache_data
@@ -270,17 +292,17 @@ with open("app/style.css", encoding="utf-8") as css:
 with st.sidebar:
     # st.write("### Page selection")
     page_selected = st.radio(
-        "Select a page to show",
+        "Pages",
         (
             "Start",
             "What?",
             "Why?",
-            "Mean Temperatures",
+            "Hot Days",
             "Goal",
             "How?",
-            "Segmentation",
+            "Segment",
             "Maps",
-            "Building Footprints",
+            "Footprints",
             "Tools",
         ),
     )
@@ -303,13 +325,13 @@ elif page_selected == "How?":
 elif page_selected == "Maps":
     landsat_maps.main()
 
-elif page_selected == "Building Footprints":
+elif page_selected == "Footprints":
     building_footprints()
 
-elif page_selected == "Segmentation":
+elif page_selected == "Segment":
     segmentation.main()
 
-elif page_selected == "Mean Temperatures":
+elif page_selected == "Hot Days":
     display_mean_temperatures()
 
 elif page_selected == "Tools":
