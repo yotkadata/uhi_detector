@@ -497,7 +497,7 @@ def reproject_geotiff(src_path, target_path, target_crs):
         return dst, reprojected_img
 
 
-def create_rgba_color_image(src_path: Path, target_path: Path):
+def create_rgba_color_image(src_path: Path, target_path: Path, colormap="RdBu_r"):
     """
     Function to map raster values to rgba.
 
@@ -528,7 +528,7 @@ def create_rgba_color_image(src_path: Path, target_path: Path):
     band_norm = (band_norm - vmin) / (vmax - vmin)
 
     # Create a colormap
-    cmap = plt.get_cmap("RdBu_r")
+    cmap = plt.get_cmap(colormap)
     norm = colors.Normalize(vmin=0, vmax=1)
 
     # Apply the colormap to the normalized band values
