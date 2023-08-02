@@ -81,6 +81,10 @@ def save_segmented_file(segmented_img, source_path, selected_model):
         / "prediction"
         / f"{source_path.stem}_{selected_model}.png"
     )
+
+    # Make sure image path exists
+    Path(segmented_png_path).parent.mkdir(parents=True, exist_ok=True)
+
     segmented_img.save(segmented_png_path)
 
 
@@ -161,6 +165,9 @@ def tab_live_segmentation():
                         "data/predict/app/source/satellite-from-leafmap"
                         f"-{str(time.time()).replace('.', '-')}.tif"
                     )
+
+                    # Make sure image path exists
+                    Path(image_path).parent.mkdir(parents=True, exist_ok=True)
 
                     # Save the selection as a GeoTIFF
                     tms_to_geotiff(
