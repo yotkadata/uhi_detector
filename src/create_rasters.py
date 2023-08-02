@@ -42,6 +42,9 @@ def create_paths(dir_paths, geojson_path):
             paths[f"{name}"] = Path(
                 dir_paths["raster"], dir_id.name + "_" + f"{name}.tif"
             )
+            paths[f"{name}_colored"] = Path(
+                dir_paths["raster"], dir_id.name + "_" + f"{name}_colored.tif"
+            )
             paths[f"{name}_repr"] = Path(
                 dir_paths["raster"], dir_id.name + "_" + f"{name}_repr.tif"
             )
@@ -64,9 +67,15 @@ def create_raster_ndvi(file_paths):
         file_paths["band_5_clipped"],
         file_paths["ndvi"],
     )
-    _, _ = utils.reproject_geotiff(file_paths["ndvi"], file_paths["ndvi_repr"], 4326)
+    # Save colored image as files
     _, _ = utils.create_rgba_color_image(
-        file_paths["ndvi_repr"], file_paths["ndvi_repr_colored"]
+        file_paths["ndvi"], file_paths["ndvi_colored"], colormap="Greens"
+    )
+    # Reproject and save
+    _, _ = utils.reproject_geotiff(file_paths["ndvi"], file_paths["ndvi_repr"], 4326)
+    # Save colored reprojected image as files
+    _, _ = utils.create_rgba_color_image(
+        file_paths["ndvi_repr"], file_paths["ndvi_repr_colored"], colormap="Greens"
     )
 
 
@@ -79,11 +88,19 @@ def create_raster_emissivity(file_paths):
         file_paths["band_5_clipped"],
         file_paths["emissivity"],
     )
+    # Save colored image as files
+    _, _ = utils.create_rgba_color_image(
+        file_paths["emissivity"], file_paths["emissivity_colored"], colormap="Blues"
+    )
+    # Reproject and save
     _, _ = utils.reproject_geotiff(
         file_paths["emissivity"], file_paths["emissivity_repr"], 4326
     )
+    # Save colored reprojected image as files
     _, _ = utils.create_rgba_color_image(
-        file_paths["emissivity_repr"], file_paths["emissivity_repr_colored"]
+        file_paths["emissivity_repr"],
+        file_paths["emissivity_repr_colored"],
+        colormap="Blues",
     )
 
 
@@ -97,9 +114,16 @@ def create_raster_lst(file_paths):
         file_paths["band_10_clipped"],
         file_paths["lst"],
     )
-    _, _ = utils.reproject_geotiff(file_paths["lst"], file_paths["lst_repr"], 4326)
+    # Save colored image as files
     _, _ = utils.create_rgba_color_image(
-        file_paths["lst_repr"], file_paths["lst_repr_colored"]
+        file_paths["lst"], file_paths["lst_colored"], colormap="RdBu_r"
+    )
+    # Reproject and save
+    _, _ = utils.reproject_geotiff(file_paths["lst"], file_paths["lst_repr"], 4326)
+
+    # Save colored reprojected image as files
+    _, _ = utils.create_rgba_color_image(
+        file_paths["lst_repr"], file_paths["lst_repr_colored"], colormap="RdBu_r"
     )
 
 
