@@ -6,8 +6,6 @@ import sys
 import time
 from pathlib import Path
 
-import branca.colormap as cm
-import cv2
 import folium
 import numpy as np
 import rasterio
@@ -57,20 +55,20 @@ def load_model_from_file(model_path):
     return model
 
 
-def create_map(location):
+def create_map(location, zoom_start=18):
     """
     Create a Folium map with a satellite layer and a drawing tool.
     """
     # Create Folium map
-    m = folium.Map(location=location, zoom_start=18)
+    folium_map = folium.Map(location=location, zoom_start=zoom_start)
 
     # Add the satellite layer
-    folium.TileLayer(MAPBOX_URL, attr="Mapbox").add_to(m)
+    folium.TileLayer(MAPBOX_URL, attr="Mapbox").add_to(folium_map)
 
     # Add drawing tool
-    Draw(export=True).add_to(m)
+    Draw(export=True).add_to(folium_map)
 
-    return m
+    return folium_map
 
 
 @st.cache_data
@@ -141,10 +139,10 @@ def tab_live_segmentation():
         location = [52.4175, 10.7440]  # Wolfsburg
 
         # Create Folium map
-        m = create_map(location)
+        folium_map = create_map(location, zoom_start=19)
 
         # Render map
-        output = st_folium(m, width=800, height=500)
+        output = st_folium(folium_map, width=800, height=500)
 
         if output["all_drawings"] is not None:
             # Create image from bounding box
@@ -159,7 +157,10 @@ def tab_live_segmentation():
                     # Convert for further use [xmin, ymin, xmax, ymax]
                     bbox = [bbox[0][0], bbox[0][1], bbox[2][0], bbox[2][1]]
 
-                    image_path = f"data/predict/app/source/satellite-from-leafmap-{str(time.time()).replace('.', '-')}.tif"
+                    image_path = (
+                        "data/predict/app/source/satellite-from-leafmap"
+                        f"-{str(time.time()).replace('.', '-')}.tif"
+                    )
 
                     # Save the selection as a GeoTIFF
                     tms_to_geotiff(
@@ -176,7 +177,7 @@ def tab_live_segmentation():
 
                 if st.button("Segment", key="segment_button_live"):
                     with st.spinner("Segmenting image..."):
-                        img, segmented_img, overlay = show_prediction(
+                        img, _, overlay = show_prediction(
                             Path(image_path), selected_model
                         )
 
@@ -236,9 +237,7 @@ def tab_segmentation_from_file():
             # Show a button to start the segmentation
             if st.button("Segment", key="segment_button_file"):
                 with st.spinner("Segmenting ..."):
-                    img, segmented_img, overlay = show_prediction(
-                        input_file_path, selected_model
-                    )
+                    img, _, overlay = show_prediction(input_file_path, selected_model)
 
                     # Show image comparison in placeholder container
                     with placeholder.container():
@@ -262,7 +261,7 @@ def tab_show_examples():
         st.title("Examples of segmentations")
 
         # Create lists of images and segmentations
-        image_paths = list(Path("data/predict/app/source").iterdir())
+        image_paths = list(Path("data/predict/examples/source").iterdir())
 
         for model_key, model_values in MODELS.items():
             valid_images = []
