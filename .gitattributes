@@ -1,1 +1,5 @@
+# Register files that Git LFS should track
 *.hdf5 filter=lfs diff=lfs merge=lfs -text
+
+# Tell linguist to count Jupyter Notebooks as Python
+*.ipynb linguist-language=Python
