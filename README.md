@@ -48,3 +48,40 @@ pip install -r requirements.txt
 export SM_FRAMEWORK=tf.keras
 streamlit run app.py
 ```
+
+### Examples
+
+Here is an example of the **live segmentation** possible in the Streamlit app:
+
+https://github.com/yotkadata/uhi_detector/assets/7913590/868a4326-b8c4-4e2a-baa4-195a859d20b6
+
+More **segmentation examples**:
+
+https://github.com/yotkadata/uhi_detector/assets/7913590/1517a1d3-826e-4e78-b93e-26840a39ace6
+
+Here some **image examples** from the project, all except the building footprints calculated from Landsat 8 satellite imagery:
+
+#### Land Surface Temperature (LST)
+<a href="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_lst_colored.jpg">
+  <img src="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_lst_colored.jpg?raw=true" width="100%" />
+</a>
+
+#### Normalized Difference Vegetation Index (NDVI)
+<a href="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_ndvi_colored.jpg">
+  <img src="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_ndvi_colored.jpg?raw=true" width="100%" />
+</a>
+
+#### Emissivity
+<a href="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_emissivity_colored.jpg">
+  <img src="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_emissivity_colored.jpg?raw=true" width="100%" />
+</a>
+
+#### Building Footprints
+<a href="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_buildings.png">
+  <img src="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_buildings.png?raw=true" width="100%" />
+</a>
+
+#### Luminance of Building Footprints
+<a href="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_luminance.png">
+  <img src="https://github.com/yotkadata/uhi_detector/blob/main/data/presentation/berlin_luminance.png?raw=true" width="100%" />
+</a>
