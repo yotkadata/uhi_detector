@@ -1,8 +1,5 @@
-data/landcover_ai/
-data/landsat/
-data/orthophotos/
-data/sentinel/
 notebooks/cache/
+temp/
 .directory
 .pylintrc
 .streamlit/secrets.toml
