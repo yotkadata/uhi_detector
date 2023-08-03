@@ -32,9 +32,11 @@ def create_paths(dir_paths, geojson_path):
             paths[f"band_{i}"] = Path(dir_id, dir_id.name + f"_B{i}.TIF")
 
         # Paths clipped to GeoJson
+        output_dir = Path(dir_paths["output"], dir_id.name)
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
         for i in range(1, 12):
             paths[f"band_{i}_clipped"] = utils.clip_to_geojson(
-                paths[f"band_{i}"], geojson_path, dir_paths["output"]
+                paths[f"band_{i}"], geojson_path, output_dir
             )
 
         # Output file paths
