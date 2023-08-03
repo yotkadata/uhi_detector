@@ -58,11 +58,11 @@ streamlit run app.py
 
 Here is an example of the **live segmentation** possible in the Streamlit app:
 
-https://github.com/yotkadata/uhi_detector/assets/7913590/868a4326-b8c4-4e2a-baa4-195a859d20b6
+https://github.com/yotkadata/uhi_detector/assets/7913590/5fdcdc30-6a7e-40ee-885c-f738fc9c8a33
 
 More **segmentation examples**:
 
-https://github.com/yotkadata/uhi_detector/assets/7913590/1517a1d3-826e-4e78-b93e-26840a39ace6
+https://github.com/yotkadata/uhi_detector/assets/7913590/d9c9ab9f-3075-4d52-937e-9dc3b87bbdc7
 
 Here some **image examples** from the project, all except the building footprints calculated from Landsat 8 satellite imagery:
 
