@@ -100,7 +100,7 @@ Here some **image examples** from the project, all except the building footprint
 
 ### Thanks
 
-- ... to [Guillaume Chevalier](https://github.com/Vooban/) for the [code](https://github.com/Vooban/Smoothly-Blend-Image-Patches) to make smooth predictions by blending image patches.
-- ... to [Dr. Sreenivas Bhattiprolu](https://github.com/bnsreenu/) for inspiring tutorials on image segmentation.
-- To my teachers at SPICED Academy, especially [Rakibur Rahman](https://github.com/rahman-rakib), [Parvin Sharifi](https://github.com/Parvinsh), and [Carmine Somma](https://github.com/CarSomma).
-- To the great people of the Bergamot Encoder cohort at SPICED Academy.
+- ... to [**Guillaume Chevalier**](https://github.com/Vooban/) for the [code](https://github.com/Vooban/Smoothly-Blend-Image-Patches) to make smooth predictions by blending image patches.
+- ... to [**Dr. Sreenivas Bhattiprolu**](https://github.com/bnsreenu/) for inspiring tutorials on image segmentation.
+- ... to my teachers at SPICED Academy, especially [**Dr. Rakibur Rahman**](https://github.com/rahman-rakib), [**Dr. Parvin Sharifi**](https://github.com/Parvinsh), and [**Dr. Carmine Somma**](https://github.com/CarSomma).
+- ... to the great people of the **Bergamot Encoder** cohort at SPICED Academy.
