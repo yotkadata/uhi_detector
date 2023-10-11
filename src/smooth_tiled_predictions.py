@@ -1,7 +1,7 @@
 """
 Perform smooth predictions on an image from tiled prediction patches.
 
-This file is a modified version of the original code Guillaume Chevalier. 
+This file is a modified version of the original code by Guillaume Chevalier. 
 It has been adapted by Dr. Sreenivas Bhattiprolu. He added this commentary:
 
 # Original code is from the following source. It comes with MIT License so please mention
