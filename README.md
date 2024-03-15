@@ -43,7 +43,11 @@ With that data, we could **identify spots for public interventions** like green 
 
 You can see results of the project in a **Streamlit App** which basically contains the live presentation of the final project. In the section "Segment" (Live Segmentation) you can try the segmentation from satellite imagery. Below, you can find a short screencast of the live segmentation.
 
-To **run the Streamlit App**, set up a Python environment, clone the repository and install the required packages, for example using PIP.
+To **run the Streamlit App**, set up a Python environment (Python 3.10), clone the repository and install the required packages, for example using PIP. Additionally, make sure that GDAL (Geospatial Data Abstraction Library) is installed on your system. On Linux, you can install it using the following command:
+
+```
+sudo apt-get install libgdal-dev
+```
 
 **Important:** Before running streamlit run app.py, make sure to add `SM_FRAMEWORK` as an environment variable:
 
