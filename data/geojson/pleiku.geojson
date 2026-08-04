@@ -1,0 +1,29 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pleiku, Gia Lai, Vietnam",
+        "description": "Bounding box covering Pleiku urban area and surroundings (~30 x 28 km)",
+        "city": "Pleiku",
+        "province": "Gia Lai",
+        "country": "Vietnam",
+        "center_lat": 13.9833,
+        "center_lon": 108.0000
+      },
+      "geometry": {
+        "coordinates": [
+          [
+            [107.8600, 13.8400],
+            [107.8600, 14.1200],
+            [108.1400, 14.1200],
+            [108.1400, 13.8400],
+            [107.8600, 13.8400]
+          ]
+        ],
+        "type": "Polygon"
+      }
+    }
+  ]
+}
